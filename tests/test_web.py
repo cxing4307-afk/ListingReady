@@ -1,0 +1,50 @@
+from io import BytesIO
+from zipfile import ZipFile
+
+import pytest
+from PIL import Image
+
+from listingready import create_app
+
+
+def upload_image(size=(640, 320), color=(36, 100, 210), fmt="JPEG") -> BytesIO:
+    stream = BytesIO()
+    Image.new("RGB", size, color).save(stream, format=fmt)
+    stream.seek(0)
+    return stream
+
+
+@pytest.fixture()
+def client():
+    app = create_app({"TESTING": True})
+    return app.test_client()
+
+
+def test_home_page_explains_the_local_workflow(client):
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert b"ListingReady" in response.data
+    assert b"Choose photos" in response.data
+
+
+def test_one_photo_downloads_as_a_named_jpeg(client):
+    response = client.post(
+        "/export",
+        data={
+            "prefix": "oakshop",
+            "canvas": "white",
+            "images": (upload_image(), "phone-photo.jpg"),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 200
+    assert response.headers["Content-Disposition"].endswith(
+        'filename=oakshop-listing-ready.zip'
+    )
+    with ZipFile(BytesIO(response.data)) as archive:
+        assert archive.namelist() == ["oakshop-001.jpg"]
+        with Image.open(BytesIO(archive.read("oakshop-001.jpg"))) as result:
+            assert result.size == (1600, 1600)
+            assert result.mode == "RGB"

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ListingReady</title>
+  </head>
+  <body>
+    <main>
+      <h1>ListingReady</h1>
+      <p>Turn a folder of phone photos into one tidy listing package.</p>
+      <form action="/export" method="post" enctype="multipart/form-data">
+        <label for="images">Choose photos</label>
+        <input id="images" name="images" type="file" accept=".jpg,.jpeg,.png" multiple required>
+        <label for="prefix">Shop prefix</label>
+        <input id="prefix" name="prefix" value="shop" required>
+        <label for="canvas">Canvas</label>
+        <select id="canvas" name="canvas">
+          <option value="white">White</option>
+          <option value="gray">Light gray</option>
+        </select>
+        <button type="submit">Build my ZIP</button>
+      </form>
+    </main>
+  </body>
+</html>
