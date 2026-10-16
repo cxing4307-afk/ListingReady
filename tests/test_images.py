@@ -1,8 +1,9 @@
 from io import BytesIO
 
+import pytest
 from PIL import Image
 
-from listingready.images import CANVAS_SIZE, prepare_listing_image
+from listingready.images import CANVAS_SIZE, UnsupportedImageError, prepare_listing_image
 
 
 def image_bytes(size=(800, 400), color=(26, 86, 219), fmt="PNG") -> BytesIO:
@@ -20,6 +21,19 @@ def test_wide_image_is_centered_without_cropping():
     assert result.getpixel((800, 100)) == (255, 255, 255)
     assert result.getpixel((800, 800)) == (26, 86, 219)
     assert result.getpixel((800, 1500)) == (255, 255, 255)
+
+
+def test_tall_image_reaches_both_edges_and_is_exactly_centered():
+    result = prepare_listing_image(
+        image_bytes(size=(400, 800), color=(45, 150, 90)), "white"
+    )
+
+    assert result.getpixel((399, 800)) == (255, 255, 255)
+    assert result.getpixel((400, 800)) == (45, 150, 90)
+    assert result.getpixel((1199, 800)) == (45, 150, 90)
+    assert result.getpixel((1200, 800)) == (255, 255, 255)
+    assert result.getpixel((800, 0)) == (45, 150, 90)
+    assert result.getpixel((800, 1599)) == (45, 150, 90)
 
 
 def test_exif_orientation_is_applied_before_fitting():
@@ -49,3 +63,10 @@ def test_transparent_png_uses_the_selected_canvas_color():
 
     assert result.getpixel((10, 10)) == (243, 244, 246)
     assert result.getpixel((800, 800)) == (190, 35, 55)
+
+
+def test_decodable_but_unsupported_format_is_rejected():
+    gif = image_bytes(fmt="GIF")
+
+    with pytest.raises(UnsupportedImageError):
+        prepare_listing_image(gif, "white")

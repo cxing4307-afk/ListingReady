@@ -186,3 +186,18 @@ def test_unknown_canvas_is_rejected(client):
 
     assert response.status_code == 400
     assert b"valid canvas color" in response.data
+
+
+def test_gif_renamed_as_png_is_not_exported(client):
+    response = client.post(
+        "/export",
+        data={
+            "prefix": "closet",
+            "canvas": "white",
+            "images": (upload_image(fmt="GIF"), "pretend.png"),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 400
+    assert b"No usable JPG or PNG images" in response.data

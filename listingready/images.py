@@ -10,10 +10,16 @@ CANVAS_COLORS = {
 }
 
 
+class UnsupportedImageError(ValueError):
+    pass
+
+
 def prepare_listing_image(source: BinaryIO, canvas: str = "white") -> Image.Image:
     background = CANVAS_COLORS[canvas]
 
     with Image.open(source) as opened:
+        if opened.format not in {"JPEG", "PNG"}:
+            raise UnsupportedImageError("Only JPG and PNG images are supported.")
         oriented = ImageOps.exif_transpose(opened)
         scale = min(CANVAS_SIZE / oriented.width, CANVAS_SIZE / oriented.height)
         fitted_size = (
