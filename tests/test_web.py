@@ -87,3 +87,76 @@ def test_unsafe_or_empty_prefix_is_rejected(client, prefix):
 
     assert response.status_code == 400
     assert b"letters, numbers, hyphens, and underscores" in response.data
+
+
+def test_bad_file_is_reported_while_good_files_still_export(client):
+    response = client.post(
+        "/export",
+        data={
+            "prefix": "closet",
+            "canvas": "gray",
+            "images": [
+                (upload_image(), "front.jpg"),
+                (BytesIO(b"not an image"), "broken.png"),
+                (upload_image(color=(70, 160, 90)), "back.png"),
+            ],
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 200
+    with ZipFile(BytesIO(response.data)) as archive:
+        assert archive.namelist() == [
+            "closet-001.jpg",
+            "closet-002.jpg",
+            "_skipped.txt",
+        ]
+        assert "broken.png: could not read this image" in archive.read(
+            "_skipped.txt"
+        ).decode()
+
+
+def test_batch_with_no_usable_images_returns_an_error(client):
+    response = client.post(
+        "/export",
+        data={
+            "prefix": "closet",
+            "canvas": "white",
+            "images": (BytesIO(b"plain text"), "notes.txt"),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 400
+    assert b"No usable JPG or PNG images" in response.data
+
+
+def test_file_over_the_configured_limit_is_skipped(client):
+    client.application.config["MAX_FILE_BYTES"] = 10
+    response = client.post(
+        "/export",
+        data={
+            "prefix": "closet",
+            "canvas": "white",
+            "images": (BytesIO(b"x" * 11), "large.jpg"),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 400
+    assert b"No usable JPG or PNG images" in response.data
+
+
+def test_more_than_one_hundred_files_is_rejected(client):
+    response = client.post(
+        "/export",
+        data={
+            "prefix": "closet",
+            "canvas": "white",
+            "images": [(BytesIO(b"x"), f"{number}.jpg") for number in range(101)],
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 400
+    assert b"100 images" in response.data
