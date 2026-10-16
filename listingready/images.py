@@ -20,13 +20,13 @@ def prepare_listing_image(source: BinaryIO, canvas: str = "white") -> Image.Imag
             max(1, round(oriented.width * scale)),
             max(1, round(oriented.height * scale)),
         )
-        fitted = oriented.convert("RGB").resize(fitted_size, Image.Resampling.LANCZOS)
+        # Keeping alpha through the resize avoids dark fringes around transparent products.
+        fitted = oriented.convert("RGBA").resize(fitted_size, Image.Resampling.LANCZOS)
 
     output = Image.new("RGB", (CANVAS_SIZE, CANVAS_SIZE), background)
     position = (
         (CANVAS_SIZE - fitted.width) // 2,
         (CANVAS_SIZE - fitted.height) // 2,
     )
-    output.paste(fitted, position)
+    output.paste(fitted, position, fitted)
     return output
-
