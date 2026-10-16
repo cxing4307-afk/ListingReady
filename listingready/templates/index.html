@@ -4,23 +4,65 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>ListingReady</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
   </head>
   <body>
-    <main>
-      <h1>ListingReady</h1>
-      <p>Turn a folder of phone photos into one tidy listing package.</p>
-      <form action="/export" method="post" enctype="multipart/form-data">
-        <label for="images">Choose photos</label>
-        <input id="images" name="images" type="file" accept=".jpg,.jpeg,.png" multiple required>
-        <label for="prefix">Shop prefix</label>
-        <input id="prefix" name="prefix" value="shop" required>
-        <label for="canvas">Canvas</label>
-        <select id="canvas" name="canvas">
-          <option value="white">White</option>
-          <option value="gray">Light gray</option>
-        </select>
-        <button type="submit">Build my ZIP</button>
+    <main class="shell">
+      <header>
+        <a class="wordmark" href="/">ListingReady</a>
+        <span class="local-note">Runs on this computer</span>
+      </header>
+
+      <section class="intro">
+        <p class="eyebrow">A tidier product folder, in one pass</p>
+        <h1>Make every listing photo<br>ready for the shelf.</h1>
+        <p class="lede">Drop in mixed phone photos. Get square, evenly padded JPGs with clean sequential names—without cropping or background tricks.</p>
+      </section>
+
+      <form class="workspace" action="/export" method="post" enctype="multipart/form-data">
+        <section class="drop-card" id="drop-zone">
+          <div class="drop-icon" aria-hidden="true">+</div>
+          <h2>Drop product photos here</h2>
+          <p>JPG or PNG · up to 100 files · 25 MB each</p>
+          <label class="choose-button" for="images">Choose photos</label>
+          <input class="file-input" id="images" name="images" type="file" accept=".jpg,.jpeg,.png" multiple required>
+          <p class="file-summary" id="file-summary" aria-live="polite">No photos selected</p>
+        </section>
+
+        <section class="settings" aria-label="Package settings">
+          <div class="field">
+            <label for="prefix">Shop prefix</label>
+            <input id="prefix" name="prefix" value="myshop" pattern="[\p{L}\p{N}_-]+" required>
+            <small>Files will be named <span id="name-preview">myshop-001.jpg</span></small>
+          </div>
+
+          <fieldset class="field">
+            <legend>Canvas color</legend>
+            <div class="swatches">
+              <label class="swatch-option">
+                <input type="radio" name="canvas" value="white" checked>
+                <span class="swatch white"></span>
+                White
+              </label>
+              <label class="swatch-option">
+                <input type="radio" name="canvas" value="gray">
+                <span class="swatch gray"></span>
+                Light gray
+              </label>
+            </div>
+          </fieldset>
+
+          <div class="promise">
+            <strong>Your whole image stays visible.</strong>
+            <span>We only rotate, resize, and add space around it.</span>
+          </div>
+
+          <button class="export-button" type="submit">Build my ZIP</button>
+        </section>
       </form>
+
+      <footer>1600 × 1600 JPG · quality 92 · no uploads to a cloud service</footer>
     </main>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
   </body>
 </html>
