@@ -11,7 +11,7 @@ It runs locally and only rotates, scales, and pads your photos—there is no cro
 You need Python 3.10 or newer.
 
 ```bash
-git clone <your-copy-of-this-repository>
+git clone https://github.com/cxing4307-afk/listingready.git
 cd listingready
 python3 -m venv .venv
 source .venv/bin/activate
@@ -47,10 +47,9 @@ pytest
 
 ## Known issues
 
-- A batch is processed in memory, so 100 large photos can use a noticeable amount of RAM.
+- A batch is processed in memory by a local development server, so 100 large photos can use noticeable RAM; the app is not intended as a public upload service.
 - Animated images are not supported as animations; only the first frame is used.
 - There is no drag-to-reorder or remove-one-file control after a drop. Reopen the picker to correct the list.
-- This is a local development server, not a hardened public upload service.
 
 ## Dependency licenses
 
@@ -61,10 +60,21 @@ All direct dependencies use permissive licenses:
 | Flask | Local web interface | BSD-3-Clause |
 | Pillow | EXIF correction and image rendering | MIT-CMU (HPND-style) |
 | pytest | Development tests | MIT |
+| setuptools | Package build backend | MIT |
+| Werkzeug | Flask HTTP utilities | BSD-3-Clause |
+| Jinja2 | HTML templates | BSD-3-Clause |
+| MarkupSafe | Safe template strings | BSD-3-Clause |
+| ItsDangerous | Flask signing utilities | BSD-3-Clause |
+| Click | Flask command-line support | BSD-3-Clause |
+| Blinker | Flask signals | MIT |
+| iniconfig | pytest configuration | MIT |
+| packaging | pytest version handling | Apache-2.0 OR BSD-2-Clause |
+| pluggy | pytest plugins | MIT |
+| Pygments | pytest terminal highlighting | BSD-2-Clause |
+| colorama | pytest colors on Windows | BSD-3-Clause |
 
-Flask's installed runtime dependencies are also permissive: Werkzeug, Jinja2, MarkupSafe, ItsDangerous, and Click use BSD-3-Clause; Blinker uses MIT. pytest's test-only dependency set uses MIT, BSD-2-Clause, or the Apache-2.0/BSD-2-Clause dual license.
+The first two rows are runtime dependencies. pytest and its supporting packages are only needed for development; setuptools is only needed to build the package. All licenses above are permissive.
 
 ## License
 
 ListingReady is available under the [MIT License](LICENSE).
-
