@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "listingready"
+version = "0.1.0"
+description = "Turn mixed phone photos into a tidy, square listing package."
+requires-python = ">=3.10"
+dependencies = [
+    "Flask>=3.0,<4",
+    "Pillow>=10,<13",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<10"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.setuptools.packages.find]
+include = ["listingready*"]
+
+[tool.setuptools.package-data]
+listingready = ["templates/*.html", "static/*.css", "static/*.js"]
+
