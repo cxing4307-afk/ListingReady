@@ -48,3 +48,42 @@ def test_one_photo_downloads_as_a_named_jpeg(client):
         with Image.open(BytesIO(archive.read("oakshop-001.jpg"))) as result:
             assert result.size == (1600, 1600)
             assert result.mode == "RGB"
+
+
+def test_batch_keeps_selection_order_and_contiguous_names(client):
+    response = client.post(
+        "/export",
+        data={
+            "prefix": "二手铺",
+            "canvas": "white",
+            "images": [
+                (upload_image(color=(210, 40, 40)), "red.jpg"),
+                (upload_image(color=(40, 80, 210)), "blue.jpg"),
+            ],
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 200
+    with ZipFile(BytesIO(response.data)) as archive:
+        assert archive.namelist() == ["二手铺-001.jpg", "二手铺-002.jpg"]
+        with Image.open(BytesIO(archive.read("二手铺-001.jpg"))) as first:
+            assert first.getpixel((800, 800))[0] > first.getpixel((800, 800))[2]
+        with Image.open(BytesIO(archive.read("二手铺-002.jpg"))) as second:
+            assert second.getpixel((800, 800))[2] > second.getpixel((800, 800))[0]
+
+
+@pytest.mark.parametrize("prefix", ["", "two words", "../shop", "shop.name"])
+def test_unsafe_or_empty_prefix_is_rejected(client, prefix):
+    response = client.post(
+        "/export",
+        data={
+            "prefix": prefix,
+            "canvas": "white",
+            "images": (upload_image(), "photo.jpg"),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 400
+    assert b"letters, numbers, hyphens, and underscores" in response.data
