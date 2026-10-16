@@ -160,3 +160,29 @@ def test_more_than_one_hundred_files_is_rejected(client):
 
     assert response.status_code == 400
     assert b"100 images" in response.data
+
+
+def test_missing_files_are_rejected(client):
+    response = client.post(
+        "/export",
+        data={"prefix": "closet", "canvas": "white"},
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 400
+    assert b"No usable JPG or PNG images" in response.data
+
+
+def test_unknown_canvas_is_rejected(client):
+    response = client.post(
+        "/export",
+        data={
+            "prefix": "closet",
+            "canvas": "transparent",
+            "images": (upload_image(), "photo.jpg"),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 400
+    assert b"valid canvas color" in response.data
